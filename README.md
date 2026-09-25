@@ -2,6 +2,35 @@
 
 An automated Infrastructure as Code (IaC) security implementation provisioning IAM least-privilege controls, explicit MFA enforcement policies, and containerized compliance auditing.
 
+## Architecture Diagram
+\\\	ext
++-------------------------------------------------------------------+
+|                        GitHub Repository                          |
+|  +-----------------------+     +-------------------------------+  |
+|  | Terraform IaC Logic   |     | GitHub Actions (CI Pipeline)  |  |
+|  |  - EnforceMFAPolicy   | --> |  - terraform fmt / validate   |  |
+|  |  - DevelopersGroup    |     |  - tfsec security scan        |  |
+|  +-----------+-----------+     +-------------------------------+  |
++--------------|----------------------------------------------------+
+               |
+               v
++-------------------------------------------------------------------+
+|                          AWS Cloud                                |
+|  +-------------------------------------------------------------+  |
+|  | IAM Engine: Explicit Deny Policy                            |  |
+|  | (Blocks actions if aws:MultiFactorAuthPresent == false)    |  |
+|  +------------------------------+------------------------------+  |
++---------------------------------|---------------------------------+
+                                  |
+                                  v
++-------------------------------------------------------------------+
+|                   Containerized Auditor                         |
+|  +-------------------------------------------------------------+  |
+|  | Docker Container (Python + Boto3)                           |  |
+|  | Audits IAM users & verifies MFA device compliance           |  |
+|  +-------------------------------------------------------------+  |
++-------------------------------------------------------------------+
+\\\`n
 ## Architecture & Workflow
 1. **Terraform IaC**: Provisions IAM Groups and attaches forced Multi-Factor Authentication conditions (\EnforceMFAPolicy\).
 2. **Containerized Audit Tool**: A Python script running inside Docker evaluates IAM users and detects non-compliant accounts lacking active MFA devices.
